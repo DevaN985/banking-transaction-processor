@@ -1,0 +1,650 @@
+{
+  "info": {
+    "_postman_id": "86867a04-a987-4481-893e-415bdab6d30e",
+    "name": "Banking Transaction Processor - Complete API Collection",
+    "description": "API collection based on the current Banking Transaction Processor source. Includes request descriptions, payloads, example responses, and variables. Workflow: bulk-load KYC → start onboarding → confirm onboarding → deposit/withdraw/transfer → confirm OTP if amount > INR 1,000 → query account/history.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39702076"
+  },
+  "item": [
+    {
+      "name": "01 - Bulk load trusted KYC records",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customers\": [\n    {\n      \"governmentIdType\": \"PAN\",\n      \"governmentIdNumber\": \"ABCDE1234F\",\n      \"firstName\": \"Devendra\",\n      \"middleName\": \"\",\n      \"lastName\": \"Bandi\",\n      \"dateOfBirth\": \"1992-05-15\",\n      \"registeredEmail\": \"customer@example.com\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/government-proofs/bulk-load",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "government-proofs",
+            "bulk-load"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Example response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customers\": [\n    {\n      \"governmentIdType\": \"PAN\",\n      \"governmentIdNumber\": \"ABCDE1234F\",\n      \"firstName\": \"Devendra\",\n      \"middleName\": \"\",\n      \"lastName\": \"Bandi\",\n      \"dateOfBirth\": \"1992-05-15\",\n      \"registeredEmail\": \"customer@example.com\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/government-proofs/bulk-load",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "government-proofs",
+                "bulk-load"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"received\": 1,\n  \"inserted\": 1,\n  \"skippedDuplicates\": 0,\n  \"duplicateIds\": []\n}"
+        }
+      ]
+    },
+    {
+      "name": "02 - Start account onboarding",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"governmentIdType\": \"PAN\",\n  \"governmentIdNumber\": \"ABCDE1234F\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/onboarding/start",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "onboarding",
+            "start"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Example response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"governmentIdType\": \"PAN\",\n  \"governmentIdNumber\": \"ABCDE1234F\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/onboarding/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "onboarding",
+                "start"
+              ]
+            }
+          },
+          "status": "Accepted",
+          "code": 202,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"challengeId\": \"<UUID>\",\n  \"accountId\": \"<generated-15-digit-account-id>\",\n  \"status\": \"OTP_SENT\",\n  \"maskedEmail\": \"c*****r@example.com\",\n  \"message\": \"KYC verified. OTP sent to registered email. Account will be created only after OTP confirmation.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "03 - Confirm account onboarding",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"challengeId\": \"{{onboardingChallengeId}}\",\n  \"otp\": \"{{onboardingOtp}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/onboarding/confirm",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "onboarding",
+            "confirm"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Example response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{onboardingChallengeId}}\",\n  \"otp\": \"{{onboardingOtp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/onboarding/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "onboarding",
+                "confirm"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"accountId\": \"<generated-15-digit-account-id>\",\n  \"balance\": 0\n}"
+        }
+      ]
+    },
+    {
+      "name": "04 - Get account details",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "{{accountId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Get account balance",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/balance",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "{{accountId}}",
+            "balance"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Deposit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 2500.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/deposits",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "{{accountId}}",
+            "deposits"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Withdraw (≤ INR 1,000 executes immediately; > INR 1,000 starts OTP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 1500.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/withdrawals",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "{{accountId}}",
+            "withdrawals"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "OTP required",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 1500.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/withdrawals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{accountId}}",
+                "withdrawals"
+              ]
+            }
+          },
+          "status": "Accepted",
+          "code": 202,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"challengeId\": \"<UUID>\",\n  \"accountId\": \"{{accountId}}\",\n  \"operation\": \"WITHDRAWAL\",\n  \"amount\": 1500.0,\n  \"status\": \"OTP_SENT\",\n  \"message\": \"OTP sent to your registered email\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "08 - Transfer (≤ INR 1,000 executes immediately; > INR 1,000 starts OTP)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{destinationAccountId}}\",\n  \"amount\": 2500.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/transfers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "transfers"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "OTP required",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccountId\": \"{{accountId}}\",\n  \"toAccountId\": \"{{destinationAccountId}}\",\n  \"amount\": 2500.0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/transfers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transfers"
+              ]
+            }
+          },
+          "status": "Accepted",
+          "code": 202,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"challengeId\": \"<UUID>\",\n  \"accountId\": \"{{accountId}}\",\n  \"operation\": \"TRANSFER\",\n  \"amount\": 2500.0,\n  \"status\": \"OTP_SENT\",\n  \"message\": \"OTP sent to your registered email\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "09 - Confirm high-value withdrawal/transfer OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"challengeId\": \"054d4847-97e9-444e-91e5-47b26685e9fd\",\n  \"otp\": \"494880\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/transactions/otp/confirm",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "transactions",
+            "otp",
+            "confirm"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Example response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeId\": \"{{transactionOtpReference}}\",\n  \"otp\": \"{{transactionOtp}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/transactions/otp/{{transactionOtpReference}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transactions",
+                "otp",
+                "{{transactionOtpReference}}",
+                "confirm"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "Text",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"status\": \"SUCCESS\",\n  \"transactionReference\": \"<transaction-id>\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "10 - Get account transaction history",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/accounts/{{accountId}}/transactions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "{{accountId}}",
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "accountId",
+      "value": "REPLACE_WITH_CREATED_ACCOUNT_ID"
+    },
+    {
+      "key": "destinationAccountId",
+      "value": "REPLACE_WITH_ANOTHER_ACCOUNT_ID"
+    },
+    {
+      "key": "onboardingChallengeId",
+      "value": "REPLACE_WITH_ONBOARDING_CHALLENGE_ID"
+    },
+    {
+      "key": "onboardingOtp",
+      "value": "REPLACE_WITH_6_DIGIT_EMAIL_OTP"
+    },
+    {
+      "key": "transactionOtpReference",
+      "value": "REPLACE_WITH_TRANSACTION_CHALLENGE_ID"
+    },
+    {
+      "key": "transactionOtp",
+      "value": "REPLACE_WITH_6_DIGIT_EMAIL_OTP"
+    }
+  ]
+}

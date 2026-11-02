@@ -39,9 +39,15 @@
     "last_opened_file_path": "D:/DXC/banking-transaction-processor",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\DXC\banking-transaction-processor" />
+    </key>
+  </component>
   <component name="RunManager" selected="JUnit.OtpChallengeTest">
     <configuration name="AccountIdGeneratorTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="banking-adapters" />
